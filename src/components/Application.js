@@ -4,58 +4,40 @@ import axios from "axios";
 import "components/Application.scss";
 import DayList from "./DayList";
 import Appointment from "./Appointment";
-
-const appointments = [
-  {
-    id: 1,
-    time: "12pm",
-  },
-  {
-    id: 2,
-    time: "1pm",
-    interview: {
-      student: "Lydia Miller-Jones",
-      interviewer:{
-        id: 3,
-        name: "Sylvia Palmer",
-        avatar: "https://i.imgur.com/LpaY82x.png",
-      }
-    }
-  },
-  {
-    id: 3,
-    time: "2pm",
-  },
-  {
-    id: 4,
-    time: "3pm",
-    interview: {
-      student: "Archie Andrews",
-      interviewer:{
-        id: 4,
-        name: "Cohana Roy",
-        avatar: "https://i.imgur.com/FK8V841.jpg",
-      }
-    }
-  },
-  {
-    id: 5,
-    time: "4pm",
-  }
-];
+import { getAppointmentsForDay, getInterview } from "helpers/selectors";
 
 export default function Application(props) {
-  const [day, setDay] = useState("Monday");
-  const [days, setDays] = useState([]);
+  const [state, setState] = useState({
+    day: "Monday",
+    days: [],
+    appointments: {},
+    interviewers: {}
+  });
+  const setDay = day => setState(prev => ({ ...prev, day }));
 
-  const newAppointments = appointments.map(app => 
-    <Appointment key={app.id} {...app}/>
-  );
+  const appointments = getAppointmentsForDay(state, state.day);
+
+  const schedule = appointments.map(app => {
+    //getInterview returns an object that contains the interview data if it is passed an object that contains an interviewer
+    const interview = getInterview(state, app.interview);
+    return (
+      <Appointment key={app.id} {...app}/>
+    )    
+  });
 
   useEffect(() => {
-    axios.get('/api/days').then((response) => {
-      console.log(response);
-      setDays([...response.data]);
+    Promise.all([
+      axios.get('/api/days'),
+      axios.get('/api/appointments'),
+      axios.get('/api/interviewers')
+    ])
+    .then((all) => {
+      console.log(all[2].data);
+      setState(prev => ({
+        ...prev,
+        days: all[0].data,
+        appointments: all[1].data,
+        interviewers: all[2].data}));
     });
   }, []);
 
@@ -71,8 +53,8 @@ export default function Application(props) {
 
         <nav className="sidebar__menu">
           <DayList 
-          days={days}
-          value={day}
+          days={state.days}
+          value={state.day}
           onChange={setDay}
           />
         </nav>
@@ -84,7 +66,7 @@ export default function Application(props) {
         />
       </section>
       <section className="schedule">
-       {newAppointments}
+       {schedule}
        <Appointment key="last" time="5pm" />
       </section>
     </main>
