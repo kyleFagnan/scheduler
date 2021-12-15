@@ -22,6 +22,29 @@ export function getAppointmentsForDay(state, day) {
   })
   //console.log('newAppointments', newAppointments);
   return newAppointments;
+};
+
+//returns an array of interviewers for that day
+export function getInterviewersForDay(state, day) {
+  let newInterviewers = [];
+
+  state.days.forEach(aday => {
+    if (aday.name === day) {
+      //console.log('aday.interviewers', aday.interviewers);
+      aday.interviewers.forEach(interviewer => {
+        //console.log('interviewer', interviewer)
+        for (let int in state.interviewers) {
+          //console.log("int", int)
+          if (int == interviewer) {
+            newInterviewers.push(state.interviewers[int])
+            //console.log('state.interviewers[int]', state.interviewers[int]);
+          }
+        }
+      })
+    }
+  })
+  //console.log('newInterviewers', newInterviewers);
+  return newInterviewers;
 }
 
 //returns an object with interview data when there is an interviewer in state object; otherwise, returns null
@@ -47,6 +70,6 @@ export function getInterview(state, interview) {
       }  
     }
   }
-  //console.log(newInterview)
+  //console.log('newInterview',newInterview)
   return newInterview;
 }
