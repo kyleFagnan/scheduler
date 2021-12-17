@@ -41,7 +41,6 @@ export default function useApplicationData() {
       days = updateSpots('bookInterview');
     } 
 
-    
     return axios
       .put(`/api/appointments/${id}`, {interview})
       .then(() => {

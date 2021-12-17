@@ -20,7 +20,7 @@ export default function Application() {
   const appointments = getAppointmentsForDay(state, state.day);
  
   const schedule = appointments.map(app => {
-    //getInterview returns an object that contains the interview data if it is passed an object that contains an interviewer
+    
     const interview = getInterview(state, app.interview);
     console.log(interview)
     return (

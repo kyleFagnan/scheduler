@@ -1,4 +1,7 @@
 
+
+
+// returns Array of appointments for day
 export function getAppointmentsForDay(state, day) {
     let correctDay={};
     let appointments=[];
@@ -17,6 +20,7 @@ export function getAppointmentsForDay(state, day) {
     return appointments
   }
 
+  // returns Array of interviewers for day
 export function getInterviewersForDay(state, day) {
   let correctDay={};
   let interviewers=[];
