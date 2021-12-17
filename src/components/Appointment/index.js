@@ -9,18 +9,18 @@ import Confirm from "./Confirm";
 import Error from "./Error";
 import "./styles.scss";
 
+
+const EMPTY = "EMPTY";
+const SHOW = "SHOW";
+const CREATE = "CREATE";
+const SAVING = "SAVING";
+const DELETING = "DELETING";
+const CONFIRM = "CONFIRM";
+const EDIT = "EDIT";
+const ERROR_SAVE = "ERROR_SAVE";
+const ERROR_DELETE = "ERROR_DELETE";
+
 export default function Appointment (props) {
-
-  const EMPTY = "EMPTY";
-  const SHOW = "SHOW";
-  const CREATE = "CREATE";
-  const SAVING = "SAVING";
-  const DELETING = "DELETING";
-  const CONFIRM = "CONFIRM";
-  const EDIT = "EDIT";
-  const ERROR_SAVE = "ERROR_SAVE";
-  const ERROR_DELETE = "ERROR_DELETE";
-
   //conditinally renders a mode within calling useVisualMode:
   //if props.interview contains a value, pass useVisualMode the SHOW mode, otherwise, pass EMPTY
   const { mode, transition, back } = useVisualMode(
@@ -55,7 +55,7 @@ export default function Appointment (props) {
       {mode === EMPTY && <Empty onAdd={() => transition(CREATE)} />}
       {mode === SHOW && <Show student={props.interview.student} interviewer={props.interview.interviewer} onEdit={() => transition(EDIT, true)} onDelete={() => transition(CONFIRM, true)}/>}
       {mode === CREATE && <Form interviewers={props.interviewers} onCancel={() => back(EMPTY)} onSave={save}/>}
-      {mode === EDIT && <Form student={props.interview.student} interviewers={props.interviewers} interviewer={props.interview.interviewer.id} onCancel={() => transition(SHOW)} onSave={save}/>}
+      {mode === EDIT && <Form student={props.interview.student} interviewers={props.interviewers} interviewer={props.interview.interviewer} onCancel={() => transition(SHOW)} onSave={save}/>}
       {mode === SAVING && <Status message="Saving..."/>}
       {mode === DELETING && <Status message="Deleting..."/>}
       {mode === CONFIRM && <Confirm onCancel={() => transition(SHOW)} onConfirm={destroy} message="Are you sure you want to delete?"/>}

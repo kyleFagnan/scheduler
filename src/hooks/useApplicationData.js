@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
 
-export default function useApplicationData(initial) {
+export default function useApplicationData() {
   const [state, setState] = useState({
     day: "Monday",
     days: [],
@@ -9,54 +9,57 @@ export default function useApplicationData(initial) {
     interviewers: {}
   });
 
-  
+  //updates the spots remaining when book/edit/cancel appointment
+  const updateSpots = (requestType) => {
+    const days = state.days.map(day => {
+      if(day.name === state.day) {
+        if (requestType === 'bookInterview') {
+          return { ...day, spots: day.spots - 1 }
+        }else {
+          return { ...day, spots: day.spots + 1 }
+        }
+      }
+      return { ...day };
+    });
+    return days;
+  }
+
+  //updates the dayList
   const setDay = day => setState(prev => ({ ...prev, day }));
 
   
   const bookInterview = (id, interview) => {
-    const appointment = {...state.appointments[id], interview: { ...interview }};
-    const appointments = {...state.appointments, [id]: appointment };
+  
+    const appointment = { ...state.appointments[id] };
+    
+    const bookOrEdit = appointment.interview ? 'edit' : 'book';
+    appointment.interview = { ...interview };
+    const appointments = { ...state.appointments, [id]: appointment };
+    
+    let days = state.days;
+    if (bookOrEdit === 'book') {
+      days = updateSpots('bookInterview');
+    } 
 
-    //makes a PUT request to update the database 
+    
     return axios
-    .put(`/api/appointments/${id}`, {interview})
-    .then(res => {
-
-      
-      setState(prev => {
-        const days = prev.days.map(day => {
-          if(day.name === prev.day) {
-            day.spots -- ;
-          }
-          return day;
-        });
-        return { ...prev, appointments, days };
-      });
-      
+      .put(`/api/appointments/${id}`, {interview})
+      .then(() => {
+        setState({ ...state, appointments, days });  
     })
   };
 
- 
+ //makes a HTTP request to delete interview data from database and sets its state to null when delete an interview
   const cancelInterview = (id) => {
     const appointment = {...state.appointments[id], interview: null};
     const appointments = {...state.appointments, [id]: appointment };
+    const days = updateSpots();
     
     return axios
-    .delete(`/api/appointments/${id}`)
-    .then(res => {
-      
-
-      //updates the spots remaining when delete the appointment
-      setState(prev => {
-        const days = prev.days.map(day => {
-          if(day.name === prev.day) {
-            day.spots ++;
-          }
-          return day;
-        });
-        return { ...prev, appointments, days };
-      });
-    })
+      .delete(`/api/appointments/${id}`)
+      .then(() => {
+        setState({ ...state, appointments, days });
+      })
   };
 
   useEffect(() => {
@@ -73,6 +76,7 @@ export default function useApplicationData(initial) {
         interviewers: all[2].data}));
     });
   }, []);
+  
 
   return { state, setDay, bookInterview, cancelInterview }
 };
